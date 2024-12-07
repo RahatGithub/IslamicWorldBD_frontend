@@ -1,4 +1,3 @@
-// navbar.js
 import { fetchTopLevelCategories, fetchCategoryDetails, hasResources } from "./apiHandler.js";
 
 /**
@@ -57,6 +56,9 @@ export async function createDynamicNavbar() {
 
     // Append all navbar items to the navbar
     navbar.innerHTML = `<ul class="nav">${navbarItems.join("")}</ul>`;
+
+    // Apply sticky styles after the navbar is generated
+    navbar.classList.add("sticky-navbar");
   } catch (error) {
     console.error("Error creating navbar:", error);
   }
