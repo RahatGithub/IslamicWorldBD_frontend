@@ -24,7 +24,7 @@ export async function createDynamicNavbar() {
           // Return a simple nav item if the category has resources
           return `
             <li class="nav-item">
-              <a href="#" class="nav-link">${category.name}</a>
+              <a href="http://127.0.0.1:8000/categories/?id=${category.id}" class="nav-link">${category.name}</a>
             </li>
           `;
         } else {
@@ -32,21 +32,43 @@ export async function createDynamicNavbar() {
           const subcategories = await fetchCategoryDetails(category.id);
 
           // Generate dropdown menu
-          const dropdownItems = subcategories
-            .map(
-              (sub) => `
-                <li>
-                  <a href="#" class="dropdown-item">${sub.name}</a>
+          const dropdownItems = await Promise.all(
+            subcategories.map(async (sub) => {
+              // Check if subcategory has further subcategories
+              const subSubcategories = await fetchCategoryDetails(sub.id);
+              const subDropdown = subSubcategories.length
+                ? `<ul class="dropdown-menu">${subSubcategories
+                    .map(
+                      (subSub) => `
+                        <li class="nav-item dropdown">
+                          <a href="#" class="dropdown-item">${subSub.name}</a>
+                          <ul class="dropdown-menu">
+                            ${subSubcategories
+                              .map(
+                                (subSubSub) => `
+                                  <li><a href="#" class="dropdown-item">${subSubSub.name}</a></li>
+                                `
+                              )
+                              .join("")}
+                          </ul>
+                        </li>`
+                    )
+                    .join("")}</ul>`
+                : "";
+              return `
+                <li class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle">${sub.name}</a>
+                  ${subDropdown}
                 </li>
-              `
-            )
-            .join("");
+              `;
+            })
+          );
 
           return `
             <li class="nav-item dropdown">
-              <a href="#" class="nav-link dropdown-toggle">${category.name}</a>
+              <a href="http://127.0.0.1:8000/categories/?id=${category.id}" class="nav-link dropdown-toggle">${category.name}</a>
               <ul class="dropdown-menu">
-                ${dropdownItems}
+                ${dropdownItems.join("")}
               </ul>
             </li>
           `;
